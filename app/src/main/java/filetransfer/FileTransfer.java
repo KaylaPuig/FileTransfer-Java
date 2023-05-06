@@ -14,7 +14,6 @@ import javax.crypto.spec.SecretKeySpec;
 
 public class FileTransfer {
     private static final String ALGORITHM = "AES";
-    private static final int KEY_SIZE = 128;
 
     private enum TransferType 
     {
@@ -40,7 +39,7 @@ public class FileTransfer {
 
     public static byte[] encrypt(byte[] bytes, String password) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException
     {
-        SecretKeySpec key = new SecretKeySpec(password.getBytes(), 0, KEY_SIZE/8, ALGORITHM);
+        SecretKeySpec key = new SecretKeySpec(password.getBytes(), ALGORITHM);
 
         Cipher cipher = Cipher.getInstance(ALGORITHM);
         cipher.init(Cipher.ENCRYPT_MODE, key);
@@ -50,7 +49,7 @@ public class FileTransfer {
 
     public static byte[] decrypt(byte[] bytes, String password) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException
     {
-        SecretKeySpec key = new SecretKeySpec(password.getBytes(), 0, KEY_SIZE/8, ALGORITHM);
+        SecretKeySpec key = new SecretKeySpec(password.getBytes(), ALGORITHM);
 
         Cipher cipher = Cipher.getInstance(ALGORITHM);
         cipher.init(Cipher.DECRYPT_MODE, key);
