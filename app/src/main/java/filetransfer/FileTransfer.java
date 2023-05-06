@@ -140,7 +140,6 @@ public class FileTransfer {
         System.out.println("    -a, --address [address:port|port]   Specify address:port combination, or port only for sending");
         System.out.println("    -f, --filename                      Specify sent/received file name");
         System.out.println("    -p, --password                      Set the password for encryption/decryption");
-        System.out.println("    -h, --help                          Display this help message");
         System.out.println("Arguments:");
         System.out.println("    [send|receive]                      Run the program in send or receive mode for the given options");
     }
