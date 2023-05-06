@@ -6,20 +6,29 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 
 public class FileReceiver 
 {
     private static final int TIMEOUT_MILLIS = 30 * 1000;
 
     private ServerSocket receiver;
+    private String password;
 
-    public FileReceiver(int port) throws IOException
+    public FileReceiver(int port, String password) throws IOException
     {
         this.receiver = new ServerSocket(port);
         receiver.setSoTimeout(TIMEOUT_MILLIS);
+
+        this.password = password;
     }
 
-    public boolean receive(File file) throws IOException
+    public boolean receive(File file) throws IOException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException
     {
         file.createNewFile();
         FileOutputStream out = new FileOutputStream(file);
@@ -43,6 +52,7 @@ public class FileReceiver
                 }
             }
 
+            adjustedBuffer = FileTransfer.decrypt(adjustedBuffer, this.password);
             out.write(adjustedBuffer);
 
             rc = senderInput.read(buffer);

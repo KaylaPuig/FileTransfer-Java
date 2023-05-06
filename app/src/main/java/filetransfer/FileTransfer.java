@@ -3,9 +3,21 @@ package filetransfer;
 import java.io.File;
 import java.io.IOException;
 import java.net.UnknownHostException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.spec.SecretKeySpec;
 
 public class FileTransfer {
-    private enum TransferType {
+    private static final String ALGORITHM = "AES";
+    private static final int KEY_SIZE = 128;
+
+    private enum TransferType 
+    {
         SEND, 
         RECEIVE
     }
@@ -14,46 +26,76 @@ public class FileTransfer {
     private static int port;
     private static String address;
     private static String fileName;
+    private static String password;
 
-    public static void main(String[] args) throws UnknownHostException, IOException {
+    public static void main(String[] args) throws UnknownHostException, IOException, ArgumentParsingException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException
+    {
         parseArgs(args);
 
-        switch(type)
-        {
-            case SEND:
-            FileSender sender = new FileSender(address, port);
-            sender.sendFile(new File(fileName));
-            break;
-
-            case RECEIVE:
-            FileReceiver receiver = new FileReceiver(port);
-            receiver.receive(new File(fileName));
-            break;
-
-            default:
-            System.err.println("Send or receive not specified");
-            System.exit(2);
-        }
+        runTransfer();
 
         System.out.println("Program terminated with no error. Ensure that the file sent/received is authentic.");
     }
 
-    private static void parseArgs(String[] args)
+
+    public static byte[] encrypt(byte[] bytes, String password) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException
     {
+        SecretKeySpec key = new SecretKeySpec(password.getBytes(), 0, KEY_SIZE/8, ALGORITHM);
+
+        Cipher cipher = Cipher.getInstance(ALGORITHM);
+        cipher.init(Cipher.ENCRYPT_MODE, key);
+
+        return cipher.doFinal(bytes);
+    }
+
+    public static byte[] decrypt(byte[] bytes, String password) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException
+    {
+        SecretKeySpec key = new SecretKeySpec(password.getBytes(), 0, KEY_SIZE/8, ALGORITHM);
+
+        Cipher cipher = Cipher.getInstance(ALGORITHM);
+        cipher.init(Cipher.DECRYPT_MODE, key);
+
+        return cipher.doFinal(bytes);
+    }
+
+    private static void parseArgs(String[] args) throws ArgumentParsingException
+    {
+        // Default password value
+        password = "default";
+
         for (int i = 0; i < args.length; i++)
         {
             String arg = args[i];
-            if (isPort(arg))
+            if (isHelp(arg))
             {
-                port = Integer.parseInt(args[++i]);
+                printHelp();
+                System.exit(0);
             }
             else if (isAddress(arg))
             {
-                address = args[++i];
+                String [] addressComponents = args[++i].split(":");
+                
+                if (addressComponents.length == 1)
+                {
+                    port = Integer.parseInt(addressComponents[0]);
+                }
+                else if (addressComponents.length == 2)
+                {
+                    address = addressComponents[0];
+                    port = Integer.parseInt(addressComponents[1]);
+                }
+                else
+                {
+                    throw new ArgumentParsingException("Improper address argument " + arg + ", must be of the form ADDRESS:PORTNUM or PORTNUM");
+                }
             }
             else if (isFileName(arg))
             {
                 fileName = args[++i];
+            }
+            else if (isPassword(arg))
+            {
+                password = args[++i];
             }
             else if (isReceiver(arg))
             {
@@ -65,15 +107,47 @@ public class FileTransfer {
             }
             else
             {
-                System.err.println("Unexpected argument " + arg);
-                System.exit(1);
+                throw new ArgumentParsingException("Unexpected argument " + arg + " at location " + i);
             }
         }
     }
 
-    private static boolean isPort(String s)
+    private static void runTransfer() throws UnknownHostException, IOException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException
     {
-        return s.equals("--port") || s.equals("-p");
+        switch(type)
+        {
+            case SEND:
+            FileSender sender = new FileSender(address, port, password);
+            sender.sendFile(new File(fileName));
+            break;
+
+            case RECEIVE:
+            FileReceiver receiver = new FileReceiver(port, password);
+            receiver.receive(new File(fileName));
+            break;
+
+            default:
+            System.err.println("Send or receive not specified");
+            System.exit(2);
+        }
+    }
+
+    private static void printHelp()
+    {
+        System.out.println("Usage: filetransfer [options] [arguments]");
+        System.out.println("Options:");
+        System.out.println("    -h, --help                          Display this help message");
+        System.out.println("    -a, --address [address:port|port]   Specify address:port combination, or port only for sending");
+        System.out.println("    -f, --filename                      Specify sent/received file name");
+        System.out.println("    -p, --password                      Set the password for encryption/decryption");
+        System.out.println("    -h, --help                          Display this help message");
+        System.out.println("Arguments:");
+        System.out.println("    [send|receive]                      Run the program in send or receive mode for the given options");
+    }
+
+    private static boolean isHelp(String s)
+    {
+        return s.equals("--help") || s.equals("-h");
     }
 
     private static boolean isAddress(String s)
@@ -84,6 +158,11 @@ public class FileTransfer {
     private static boolean isFileName(String s)
     {
         return s.equals("--filename") || s.equals("-f");
+    }
+
+    private static boolean isPassword(String s)
+    {
+        return s.equals("--password") || s.equals("-p");
     }
 
     private static boolean isReceiver(String s)

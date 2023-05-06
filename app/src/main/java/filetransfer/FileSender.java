@@ -6,17 +6,25 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 
 public class FileSender 
 {
     private Socket receiver;
+    private String password;
 
-    public FileSender(String address, int port) throws UnknownHostException, IOException
+    public FileSender(String address, int port, String password) throws UnknownHostException, IOException
     {
         this.receiver = new Socket(address, port);
+        this.password = password;
     }
 
-    public boolean sendFile(File file) throws IOException
+    public boolean sendFile(File file) throws IOException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException
     {
         if (!file.exists() || !file.isFile())
             return false;
@@ -39,6 +47,7 @@ public class FileSender
                 }
             }
 
+            adjustedBuffer = FileTransfer.encrypt(adjustedBuffer, this.password);
             receiverStream.write(adjustedBuffer);
 
             rc = in.read(buffer);
