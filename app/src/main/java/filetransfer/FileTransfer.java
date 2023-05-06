@@ -2,9 +2,12 @@ package filetransfer;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.UnknownHostException;
 import java.security.InvalidKeyException;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -37,9 +40,9 @@ public class FileTransfer {
         System.out.println("Program terminated with no error. Ensure that the file sent/received is authentic.");
     }
 
-    public static byte[] encrypt(byte[] bytes, String password) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException
+    public static byte[] encrypt(byte[] bytes, String password) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException
     {
-        SecretKeySpec key = new SecretKeySpec(keyToLength(password.getBytes(), KEY_SIZE/8), 0, KEY_SIZE/8, ALGORITHM);
+        SecretKeySpec key = new SecretKeySpec(hashedPassword(password), 0, KEY_SIZE/8, ALGORITHM);
 
         Cipher cipher = Cipher.getInstance(ALGORITHM);
         cipher.init(Cipher.ENCRYPT_MODE, key);
@@ -47,9 +50,9 @@ public class FileTransfer {
         return cipher.doFinal(bytes);
     }
 
-    public static byte[] decrypt(byte[] bytes, String password) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException
+    public static byte[] decrypt(byte[] bytes, String password) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException
     {
-        SecretKeySpec key = new SecretKeySpec(keyToLength(password.getBytes(), KEY_SIZE/8), 0, KEY_SIZE/8, ALGORITHM);
+        SecretKeySpec key = new SecretKeySpec(hashedPassword(password), 0, KEY_SIZE/8, ALGORITHM);
 
         Cipher cipher = Cipher.getInstance(ALGORITHM);
         cipher.init(Cipher.DECRYPT_MODE, key);
@@ -57,13 +60,11 @@ public class FileTransfer {
         return cipher.doFinal(bytes);
     }
 
-    private static byte[] keyToLength(byte[] key, int len)
+    private static byte[] hashedPassword(String password) throws NoSuchAlgorithmException, UnsupportedEncodingException
     {
-        byte[] result = new byte[len];
-        for (int i = 0; i < key.length; i++)
-        {
-            result[i] = key[i];
-        }
+        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+        byte[] hash = digest.digest(password.getBytes("UTF-8"));
+        byte[] result = Arrays.copyOf(hash, KEY_SIZE / 8);
         return result;
     }
 

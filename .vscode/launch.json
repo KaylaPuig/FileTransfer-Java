@@ -10,7 +10,7 @@
             "request": "launch",
             "mainClass": "filetransfer.FileTransfer",
             "projectName": "app",
-            "args": ""
+            "args": "-h"
         }
     ]
 }
