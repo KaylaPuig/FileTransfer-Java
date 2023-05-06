@@ -14,6 +14,7 @@ import javax.crypto.spec.SecretKeySpec;
 
 public class FileTransfer {
     private static final String ALGORITHM = "AES";
+    private static final int KEY_SIZE = 128;
 
     private enum TransferType 
     {
@@ -36,10 +37,9 @@ public class FileTransfer {
         System.out.println("Program terminated with no error. Ensure that the file sent/received is authentic.");
     }
 
-
     public static byte[] encrypt(byte[] bytes, String password) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException
     {
-        SecretKeySpec key = new SecretKeySpec(password.getBytes(), ALGORITHM);
+        SecretKeySpec key = new SecretKeySpec(keyToLength(password.getBytes(), KEY_SIZE/8), 0, KEY_SIZE/8, ALGORITHM);
 
         Cipher cipher = Cipher.getInstance(ALGORITHM);
         cipher.init(Cipher.ENCRYPT_MODE, key);
@@ -49,12 +49,22 @@ public class FileTransfer {
 
     public static byte[] decrypt(byte[] bytes, String password) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException
     {
-        SecretKeySpec key = new SecretKeySpec(password.getBytes(), ALGORITHM);
+        SecretKeySpec key = new SecretKeySpec(keyToLength(password.getBytes(), KEY_SIZE/8), 0, KEY_SIZE/8, ALGORITHM);
 
         Cipher cipher = Cipher.getInstance(ALGORITHM);
         cipher.init(Cipher.DECRYPT_MODE, key);
 
         return cipher.doFinal(bytes);
+    }
+
+    private static byte[] keyToLength(byte[] key, int len)
+    {
+        byte[] result = new byte[len];
+        for (int i = 0; i < key.length; i++)
+        {
+            result[i] = key[i];
+        }
+        return result;
     }
 
     private static void parseArgs(String[] args) throws ArgumentParsingException
