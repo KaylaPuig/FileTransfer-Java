@@ -41,7 +41,7 @@ public class FileSender
                 }
             }
 
-            Scramble.scramble(adjustedBuffer, Scramble.seedFromString(this.password));
+            adjustedBuffer = Scramble.scramble(adjustedBuffer, Scramble.seedFromString(this.password));
             receiverStream.write(adjustedBuffer);
 
             rc = in.read(buffer);

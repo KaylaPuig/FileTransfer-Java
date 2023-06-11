@@ -45,7 +45,7 @@ public class FileReceiver
                 }
             }
 
-            Scramble.unscramble(adjustedBuffer, Scramble.seedFromString(this.password));
+            adjustedBuffer = Scramble.unscramble(adjustedBuffer, Scramble.seedFromString(this.password));
             out.write(adjustedBuffer);
 
             rc = senderInput.read(buffer);

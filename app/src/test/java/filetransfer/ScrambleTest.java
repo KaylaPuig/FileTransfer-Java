@@ -15,12 +15,12 @@ class ScrambleTest {
 
     @Test void scrambleThrowsNoException()
     {
-        byte[] scrambled = Scramble.scramble(testArray, seed);
+        Scramble.scramble(testArray, seed);
     }
 
     @Test void unscrambleThrowsNoException()
     {
-        byte[] unscrambled = Scramble.unscramble(testArray, seed);
+        Scramble.unscramble(testArray, seed);
     }
 
     @Test void scrambleSizeIdentical()
