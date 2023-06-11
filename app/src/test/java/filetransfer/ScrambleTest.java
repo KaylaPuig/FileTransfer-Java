@@ -35,11 +35,31 @@ class ScrambleTest {
         assertEquals(unscrambled.length, testArray.length);
     }
 
+    @Test void scrambledArrayIsScrambled()
+    {
+        int matchCount = 0;
+        byte[] scrambled = Scramble.scramble(testArray, seed);
+        for (int i = 0; i < scrambled.length; i++)
+        {
+            if (testArray[i] == scrambled[i])
+            {
+                matchCount++;
+            }
+        }
+        assertNotEquals(matchCount, testArray.length);
+    }
+
     @Test void preScrambleArrayMatchesUnscrambledArray() 
     {
         byte[] scrambled = Scramble.scramble(testArray, seed);
         byte[] unscrambled = Scramble.unscramble(scrambled, seed);
 
         assertArrayEquals(testArray, unscrambled);
+    }
+
+    @Test void hashingFunctionNonZero()
+    {
+        long res = Scramble.seedFromString("This string surely must have a nonzero hash!");
+        assertNotEquals(res, 0);
     }
 }

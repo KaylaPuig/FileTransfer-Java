@@ -10,10 +10,12 @@ import java.net.UnknownHostException;
 public class FileSender 
 {
     private Socket receiver;
+    private String password;
 
-    public FileSender(String address, int port) throws UnknownHostException, IOException
+    public FileSender(String address, int port, String password) throws UnknownHostException, IOException
     {
         this.receiver = new Socket(address, port);
+        this.password = password;
     }
 
     public boolean send(File file) throws IOException
@@ -39,6 +41,7 @@ public class FileSender
                 }
             }
 
+            Scramble.scramble(adjustedBuffer, Scramble.seedFromString(this.password));
             receiverStream.write(adjustedBuffer);
 
             rc = in.read(buffer);

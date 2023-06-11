@@ -9,6 +9,7 @@
 plugins {
     // Apply the application plugin to add support for building a CLI application in Java.
     id 'application'
+    id 'com.github.johnrengelman.shadow' version '7.1.2'
 }
 
 repositories {
@@ -39,4 +40,11 @@ application {
 tasks.named('test') {
     // Use JUnit Platform for unit tests.
     useJUnitPlatform()
+}
+
+// Output to build/libs/filetransfer-shadow.jar
+shadowJar {
+   archiveBaseName.set('filetransfer-shadow')
+   archiveClassifier.set('')
+   archiveVersion.set('')
 }

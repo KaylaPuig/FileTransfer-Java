@@ -1,5 +1,6 @@
 package filetransfer;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 /*
@@ -41,6 +42,22 @@ public class Scramble
         return unscrambled;
     }
 
+    /*
+     * Essentially a hashing function, but standardized
+     */
+    public static long seedFromString(String str)
+    {
+        long hash = 0b0;
+
+        int i = 0;
+        for (byte b : str.getBytes(StandardCharsets.UTF_8))
+        {
+            hash += ((long) b) << (8 * (i++ % 8));
+        }
+
+        return hash;
+    }
+
     private static final long MULTIPLIER = 25214903917L;
     private static final long INCREMENT = 11L;
     private static final long MODULUS = (1L << 48);
@@ -48,6 +65,4 @@ public class Scramble
     {
         return (MULTIPLIER * (seed + current) + INCREMENT) % MODULUS;
     }
-
-    //private static void swap
 }

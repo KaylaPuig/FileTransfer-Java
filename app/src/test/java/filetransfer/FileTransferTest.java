@@ -60,8 +60,8 @@ public class FileTransferTest
         fileR.createFile("");
         fileS.createFile("Hello, world!");
 
-        FileReceiver receiver = new FileReceiver(port);
-        FileSender sender = new FileSender("localhost", port);
+        FileReceiver receiver = new FileReceiver(port, password);
+        FileSender sender = new FileSender("localhost", port, password);
 
         ExecutorService executor = Executors.newFixedThreadPool(2);
         executor.submit(() -> receiver.receive(fileR.getFile()));

@@ -12,10 +12,12 @@ public class FileReceiver
     private static final int TIMEOUT_MILLIS = 30 * 1000;
 
     private ServerSocket receiver;
+    private String password;
 
-    public FileReceiver(int port) throws IOException
+    public FileReceiver(int port, String password) throws IOException
     {
         this.receiver = new ServerSocket(port);
+        this.password = password;
         receiver.setSoTimeout(TIMEOUT_MILLIS);
     }
 
@@ -43,6 +45,7 @@ public class FileReceiver
                 }
             }
 
+            Scramble.unscramble(adjustedBuffer, Scramble.seedFromString(this.password));
             out.write(adjustedBuffer);
 
             rc = senderInput.read(buffer);
