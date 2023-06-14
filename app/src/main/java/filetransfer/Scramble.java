@@ -43,16 +43,18 @@ public class Scramble
     }
 
     /*
-     * Essentially a hashing function, but standardized
+     * FNV-1 Hashing function, based on Wikipedia's description of the algorithm
      */
+    private static final long FNV_OFFSET = 0xcbf29ce484222325L;
+    private static final long FNV_PRIME = 0x100000001b3L;
     public static long seedFromString(String str)
     {
-        long hash = 0b0;
+        long hash = FNV_OFFSET;
 
-        int i = 0;
         for (byte b : str.getBytes(StandardCharsets.UTF_8))
         {
-            hash += ((long) b) << (8 * (i++ % 8));
+            hash *= FNV_PRIME;
+            hash ^= b;
         }
 
         return hash;

@@ -7,8 +7,8 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ScrambleTest {
-    private static long seed = 139587135L;
-    private static byte[] testArray = new byte[]
+    private static final long seed = 139587135L;
+    private static final byte[] testArray = new byte[]
     {
         13, 110, -12, 57, 0, 1, 17, 17, 9
     };
@@ -57,9 +57,20 @@ class ScrambleTest {
         assertArrayEquals(testArray, unscrambled);
     }
 
-    @Test void hashingFunctionNonZero()
+    @Test void hashingFunctionIsNonZero()
     {
         long res = Scramble.seedFromString("This string surely must have a nonzero hash!");
         assertNotEquals(res, 0);
+    }
+
+    /*
+     * Note that this test may technically have the ability to fail the assertion,
+     * but it is highly unlikely given the difference in the strings.
+     */
+    @Test void hashingFunctionYieldsDifferentResults()
+    {
+        long hash1 = Scramble.seedFromString("First");
+        long hash2 = Scramble.seedFromString("Second");
+        assertNotEquals(hash1, hash2);
     }
 }
