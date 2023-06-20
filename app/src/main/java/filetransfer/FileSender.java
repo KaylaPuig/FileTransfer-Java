@@ -26,6 +26,7 @@ public class FileSender
         byte[] buffer = new byte[512];
         FileInputStream in = new FileInputStream(file);
         int rc = in.read(buffer);
+        Scrambler scrambler = new Scrambler(Scrambler.seedFromString(this.password));
 
         OutputStream receiverStream = receiver.getOutputStream();
 
@@ -41,7 +42,7 @@ public class FileSender
                 }
             }
 
-            adjustedBuffer = Scramble.scramble(adjustedBuffer, Scramble.seedFromString(this.password));
+            adjustedBuffer = scrambler.scramble(adjustedBuffer);
             receiverStream.write(adjustedBuffer);
 
             rc = in.read(buffer);

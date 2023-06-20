@@ -8,15 +8,26 @@ import java.util.Arrays;
  * This class is not a valid substitute for genuine encryption methods and should not be treated as such
  * By that same token, neither should this file transfer program be treated as secure
  */
-public class Scramble
+public class Scrambler
 {
-    public static byte[] scramble(byte[] data, long seed)
+    private static final long MULTIPLIER = 0x5DEECE66DL;
+    private static final long INCREMENT = 0xBL;
+    private static final long MODULUS = (1L << 48);
+
+    private long seed;
+
+    public Scrambler(long seed)
+    {
+        this.seed = seed;
+    }
+
+    public byte[] scramble(byte[] data)
     {
         byte[] scrambled = Arrays.copyOf(data, data.length);
 
         for (int i = 0; i < scrambled.length; i++)
         {
-            int randIndex = Math.abs(((int) rand(seed, i)) % scrambled.length);
+            int randIndex = Math.abs(nextInt()) % scrambled.length;
 
             byte temp = scrambled[i];
             scrambled[i] = scrambled[randIndex];
@@ -26,13 +37,19 @@ public class Scramble
         return scrambled;
     }
 
-    public static byte[] unscramble(byte[] data, long seed)
+    public byte[] unscramble(byte[] data)
     {
+        int[] indices = new int[data.length];
+        for (int i = 0; i < indices.length; i++)
+        {
+            indices[i] = Math.abs(nextInt()) % indices.length;
+        }
+
         byte[] unscrambled = Arrays.copyOf(data, data.length);
 
         for (int i = unscrambled.length - 1; i >= 0; i--)
         {
-            int randIndex = Math.abs(((int) rand(seed, i)) % unscrambled.length);
+            int randIndex = indices[i];
 
             byte temp = unscrambled[i];
             unscrambled[i] = unscrambled[randIndex];
@@ -40,6 +57,17 @@ public class Scramble
         }
 
         return unscrambled;
+    }
+
+    public int nextInt()
+    {
+        return (int) nextLong();
+    }
+
+    public long nextLong()
+    {
+        seed = (seed * MULTIPLIER + INCREMENT) & (MODULUS - 1);
+        return seed;
     }
 
     /*
@@ -58,13 +86,5 @@ public class Scramble
         }
 
         return hash;
-    }
-
-    private static final long MULTIPLIER = 25214903917L;
-    private static final long INCREMENT = 11L;
-    private static final long MODULUS = (1L << 48);
-    private static long rand(long seed, long current)
-    {
-        return (MULTIPLIER * (seed + current) + INCREMENT) % MODULUS;
     }
 }

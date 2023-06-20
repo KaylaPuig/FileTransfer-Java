@@ -15,30 +15,35 @@ class ScrambleTest {
 
     @Test void scrambleThrowsNoException()
     {
-        Scramble.scramble(testArray, seed);
+        Scrambler scrambler = new Scrambler(seed);
+        scrambler.scramble(testArray);
     }
 
     @Test void unscrambleThrowsNoException()
     {
-        Scramble.unscramble(testArray, seed);
+        Scrambler scrambler = new Scrambler(seed);
+        scrambler.unscramble(testArray);
     }
 
     @Test void scrambleSizeIdentical()
     {
-        byte[] scrambled = Scramble.scramble(testArray, seed);
+        Scrambler scrambler = new Scrambler(seed);
+        byte[] scrambled = scrambler.scramble(testArray);
         assertEquals(scrambled.length, testArray.length);
     }
 
     @Test void unscrambleSizeIdentical()
     {
-        byte[] unscrambled = Scramble.unscramble(testArray, seed);
+        Scrambler unscrambler = new Scrambler(seed);
+        byte[] unscrambled = unscrambler.unscramble(testArray);
         assertEquals(unscrambled.length, testArray.length);
     }
 
     @Test void scrambledArrayIsScrambled()
     {
+        Scrambler scrambler = new Scrambler(seed);
         int matchCount = 0;
-        byte[] scrambled = Scramble.scramble(testArray, seed);
+        byte[] scrambled = scrambler.scramble(testArray);
         for (int i = 0; i < scrambled.length; i++)
         {
             if (testArray[i] == scrambled[i])
@@ -51,15 +56,18 @@ class ScrambleTest {
 
     @Test void preScrambleArrayMatchesUnscrambledArray() 
     {
-        byte[] scrambled = Scramble.scramble(testArray, seed);
-        byte[] unscrambled = Scramble.unscramble(scrambled, seed);
+        Scrambler scrambler = new Scrambler(seed);
+        byte[] scrambled = scrambler.scramble(testArray);
+        
+        Scrambler unscrambler = new Scrambler(seed);
+        byte[] unscrambled = unscrambler.unscramble(scrambled);
 
         assertArrayEquals(testArray, unscrambled);
     }
 
     @Test void hashingFunctionIsNonZero()
     {
-        long res = Scramble.seedFromString("This string surely must have a nonzero hash!");
+        long res = Scrambler.seedFromString("This string surely must have a nonzero hash!");
         assertNotEquals(res, 0);
     }
 
@@ -69,8 +77,8 @@ class ScrambleTest {
      */
     @Test void hashingFunctionYieldsDifferentResults()
     {
-        long hash1 = Scramble.seedFromString("First");
-        long hash2 = Scramble.seedFromString("Second");
+        long hash1 = Scrambler.seedFromString("First");
+        long hash2 = Scrambler.seedFromString("Second");
         assertNotEquals(hash1, hash2);
     }
 }
