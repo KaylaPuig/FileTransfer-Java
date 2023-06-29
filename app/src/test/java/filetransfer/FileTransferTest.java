@@ -51,6 +51,7 @@ public class FileTransferTest
 
     private static int port = 15808;
     private static String password = "PineappleBananaSocks42";
+    private static String otherPassword = "different password";
 
     @Test void fileTransferWorks() throws IOException
     {
@@ -87,5 +88,89 @@ public class FileTransferTest
         fileS.deleteFile();
 
         assertArrayEquals(received, sent);
+    }
+
+    @Test void differentPasswordsYieldDifferentFileContents() throws IOException
+    {
+        UniqueFileMaker fileR = new UniqueFileMaker();
+        UniqueFileMaker fileS = new UniqueFileMaker();
+
+        fileR.createFile("");
+        fileS.createFile("Hello, world!");
+
+        FileReceiver receiver = new FileReceiver(port, password);
+        FileSender sender = new FileSender("localhost", port, otherPassword);
+
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+        executor.submit(() -> receiver.receive(fileR.getFile()));
+        executor.submit(() -> sender.send(fileS.getFile()));
+
+        executor.shutdown();
+        while (!executor.isTerminated())
+        {
+            try 
+            {
+                Thread.sleep(1);
+            } 
+            catch (InterruptedException e) 
+            {
+                e.printStackTrace();
+            }
+        }
+
+        byte[] received = Files.readAllBytes(fileR.getFile().toPath());
+        byte[] sent = Files.readAllBytes(fileS.getFile().toPath());
+
+        fileR.deleteFile();
+        fileS.deleteFile();
+
+        int equalCount = 0;
+        for (int i = 0; i < received.length; i++)
+            if (received[i] == sent[i])
+                equalCount++;
+
+        assertNotEquals(equalCount, received.length);
+    }
+
+    @Test void differentPasswordsYieldDifferentFileContentsSwapped() throws IOException
+    {
+        UniqueFileMaker fileR = new UniqueFileMaker();
+        UniqueFileMaker fileS = new UniqueFileMaker();
+
+        fileR.createFile("");
+        fileS.createFile("Hello, world!");
+
+        FileReceiver receiver = new FileReceiver(port, otherPassword);
+        FileSender sender = new FileSender("localhost", port, password);
+
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+        executor.submit(() -> receiver.receive(fileR.getFile()));
+        executor.submit(() -> sender.send(fileS.getFile()));
+
+        executor.shutdown();
+        while (!executor.isTerminated())
+        {
+            try 
+            {
+                Thread.sleep(1);
+            } 
+            catch (InterruptedException e) 
+            {
+                e.printStackTrace();
+            }
+        }
+
+        byte[] received = Files.readAllBytes(fileR.getFile().toPath());
+        byte[] sent = Files.readAllBytes(fileS.getFile().toPath());
+
+        fileR.deleteFile();
+        fileS.deleteFile();
+
+        int equalCount = 0;
+        for (int i = 0; i < received.length; i++)
+            if (received[i] == sent[i])
+                equalCount++;
+
+        assertNotEquals(equalCount, received.length);
     }
 }
